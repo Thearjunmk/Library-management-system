@@ -1,0 +1,356 @@
+#include<iostream>
+#include<stdlib.h>
+#include<conio.h>
+#include<process.h>
+#include<fstream>
+#include<iostream>
+#include<stdio.h>
+#include<ctype.h>
+#include<cstdio>
+#include<string.h>
+#include<ios>
+#include<limits>
+using namespace std;
+
+    // begin class books
+    class books{
+        char name[50];
+        char author[50];
+        int bookcode,i;
+        public :
+        int copies;
+
+ //accept tjedetails of new book
+        void getval (){
+            ("cls");
+        cout<<"Enter Books Name\n";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get(name, 50);
+        cout<<"\nEnter Author\n";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get(author,50);
+        cout<<"\nBook Added\n";
+        bookcode=code();
+        copies = 1;
+        system("pause");
+        }
+
+        char *bookname(){return name;}
+//assign code number
+        int code(){
+            books b1;
+            int c=0;
+            fstream a;
+            a.open("Library.dat",ios::in|ios::binary);
+            while (a.read((char*)&b1,sizeof(books))){
+                c++;
+                if(!a)
+                    break;
+                }
+            a.close();
+            return(c+1);
+           }
+
+        int showcode(){return bookcode;}
+
+        void showval(){ cout<<name<<"\t\t"<<author<<"\t\t"<<bookcode; }
+      };
+
+// begin class member
+     class member{
+        char membername[50];
+        public :
+        int membership;
+        char bookname[50];
+        void insertmem(){
+            system("cls");
+            cout<<"\t\t New Members"<<endl;
+            cout<<"\t\t =*=*=*=*=*="<<endl;
+            cout<<"Enter Members Name"<<endl;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.get(membername,50);
+            membership=re();
+            cout<<"Member added\n";
+            system("pause");
+                }
+
+        int re(){
+        member m1;
+        int c=0;
+        fstream a;
+        a.open("Member.dat",ios::in|ios::binary);
+        while (a.read((char*)&m1,sizeof(member))){
+                c++;
+                if(!a)
+                    break;
+
+            }
+        a.close();
+        return(c+1);
+        }
+     void show()
+     { cout<<membername<<"\t\t"<<membership<<"\t\t"<<bookname; }
+
+
+    };
+// Create a new book or add existing book
+     void newb(){
+        fstream afile;
+        char na[50];
+        books b1;
+        int b;
+
+        cout<<"Do You want to add a new book or add a copy of existing book\n1.New Book 2.Existing Book"<<endl;
+        cin>>b;
+        switch (b){
+            case 2:
+                system("cls");
+                afile.open("Library.dat",ios::in|ios::binary|ios::out);
+                cout<<"Enter the name of book"<<endl;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cin.get(na,50);
+                while(afile.read((char*)&b1,sizeof(books)))
+                {
+                    if(strcmp(na,b1.bookname())==0){
+                        b1.copies++;
+                        afile.seekp(-sizeof(books),ios::cur);
+                        afile.write((char*)&b1,sizeof(books));
+                        cout<<"Book added\n";
+                    }
+                }
+                system("pause");
+                break;
+            case 1:
+                afile.open("Library.dat",ios::app|ios::binary);
+                b1.getval();
+                afile.write((char*)&b1,sizeof(books));
+                break;
+            default :
+                cout<<"Wrong Choice";
+                break;
+ }
+ afile.close();
+}
+
+// Deleting a book
+        void deleteb(){
+            books b1;
+            int bid ;
+            char bname[50];
+        fstream a;
+        fstream b;
+        cout<<"Enter the book name"<<endl;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get(bname,50);
+        a.open("Library.dat",ios::in|ios::binary);
+        b.open("i.dat",ios::out|ios::binary);
+        while(a.read((char*)&b1,sizeof(books))){
+                if(strcmp(bname,b1.bookname())==0){
+                    cout<<"Record has been deleted"<<endl;
+                    system("pause");}
+                else
+                    b.write((char*)&b1,sizeof(books));
+        }
+       a.close();
+       b.close();
+       remove("Library.dat");
+       rename("i.dat","Library.dat");
+      }
+//Inventory - to add a new/existing book or deleting a book
+    void inventory(){
+        system("cls");
+        int a;
+        cout<<"\t\t INVENTORY"<<endl;
+        cout<<"\t\t +-+-+-+-+"<<endl;
+        cout<<"1.New Book \n2.Delete Record"<<endl<<"Enter your choice  ";
+        cin>>a;
+        switch(a){
+            case 1:
+            newb();
+            break;
+            case 2:
+            deleteb();
+            break;
+            default:
+            cout<<"\nwrong choice";
+            }
+
+        }
+// checking availability
+    void avail(){
+        system("cls");
+        books b1;
+        char name[50];
+        cout<<"\t\t\tAvailability"<<endl;
+        cout<<"\t\t\t=-=-=-=-=-=-"<<endl;
+        cout<<"Enter The Book Name to be searched for "<<endl;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get(name,50);
+        fstream a;
+        a.open("Library.dat",ios::in|ios::binary);
+        while(a.read((char*)&b1,sizeof(books))){
+            if(strcmp(name,b1.bookname())==0){
+            cout<<"\nThe No of Copies Available "<<b1.copies<<endl;
+            system("pause");}
+        }
+      }
+
+// adding a new member
+    void newmember(){
+        member m1;
+        m1.insertmem();
+        fstream a;
+        a.open("Member.dat",ios::app|ios::binary);
+        a.write((char*)&m1,sizeof(member));
+        }
+// Issuing a book
+    void issue(){
+        char name[50];
+        books b1;
+        member m1;
+        int no;
+        fstream a,b;
+        system("cls");
+        cout<<"\t\t ISSUING"<<endl;
+        cout<<"\t\t =*=*=*="<<endl;
+        cout<<"Enter the book to be Issued"<<endl;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get(name,50);
+        cout<<"\nEnter The Membership No"<<endl;
+        cin>>no;
+        a.open("Library.dat",ios::out|ios::binary|ios::in);
+        b.open("Member.dat",ios::out|ios::binary|ios::in);
+        while (a.read((char*)&b1,sizeof(books))){
+                if (strcmp(name,b1.bookname())==0){
+                    b1.copies--;
+                    a.seekp(-sizeof(books),ios::cur);
+                    a.write((char*)&b1,sizeof(books));
+      }}
+        while (b.read((char*)&m1,sizeof(member))){
+                if (no==m1.membership){
+                    strcpy(m1.bookname,name);
+                    b.seekp(-sizeof(books),ios::cur);
+                    b.write((char*)&b1,sizeof(books));
+                    }
+       }
+     cout<<"Book Issued";
+     getch();
+       }
+//book return
+    void returns(){
+        char name[50];
+        books b1;
+        member m1;
+        int no;
+        fstream a,b;
+        system("cls");
+        cout<<"Enter the book to be Returned"<<endl;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get(name,50);
+        cout<<"\nEnter The Membership No"<<endl;
+        cin>>no;
+        a.open("Library.dat",ios::out|ios::binary|ios::in);
+        b.open("Member.dat",ios::out|ios::binary|ios::in);
+        while (a.read((char*)&b1,sizeof(books))){
+                if(strcmp(name,b1.bookname())==0){
+                    b1.copies=b1.copies+1;
+                    a.seekp(-sizeof(books),ios::cur);
+                    a.write((char*)&b1,sizeof(books));}
+      }
+        while (b.read((char*)&m1,sizeof(member))){
+                if(no==m1.membership){
+                    m1.bookname=="\o";
+                    b.seekp(-sizeof(books),ios::cur);
+                    b.write((char*)&b1,sizeof(books));
+    }}
+    cout<<"Book Returned\n";
+    system("pause");
+    getch();
+   }
+//display books
+    void book(){
+        fstream a;
+        books b1;
+        a.open("Library.dat",ios::in|ios::binary);
+        system("cls");
+        cout<<"List:\n";
+        while (a.read((char*)&b1,sizeof(books))){
+            b1.showval();
+            cout<<"\n";
+      }
+      getch();
+    }
+//display members
+    void members(){
+        fstream a;
+        member m1;
+        system("cls");
+        cout<<"List of members:\n";
+        a.open("Member.dat",ios::in|ios::binary);
+        while(a.read((char*)&m1,sizeof(member))){
+            m1.show();
+            cout<<"\n";
+        }
+        getch();
+        }
+
+   int main (){
+       system("cls");
+       int j,N,choice;
+       j=1;
+
+   cout<<"\t\t\t Welcome to DTU Library"<<endl;
+   cout<<"\t\t\t=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*="<<endl<<endl<<endl;
+   cout<<"\t\t\t   TEACHERS LOGIN"<<endl;
+   cout<<"\t\t\t   +-+-+-+-+-+-+-"<<endl;
+   cout<<"\n\t\t     Enter Librarian Password  ";
+   cin>>N ;
+   if(N==1234){
+   while(j==1){
+    system("cls");
+     cout<<"\t\t\t Main Menu"<<endl;
+     cout<<"\t\t\t =-=-=-=-="<<endl;
+     cout<<" 1.Inventory \n 2.Availability \n 3.Issuing \n 4.Returns \n 5.New Member \n 6.Log Out\n 7.Display all books\n 8.Display all members"<<endl;
+     cout<<"Enter your choice  ";
+     cin>>choice;
+     switch (choice){
+        case 1:
+        inventory();
+        break;
+        case 2:
+        avail();
+        break;
+        case 3:
+        issue();
+        break;
+        case 4:
+        returns();
+        break;
+        case 5:
+        newmember();
+        break;
+        case 6:
+        exit(0);
+        case 7:
+        book();
+        break;
+        case 8:
+        members();
+        break;
+        default:
+        cout<<"Wrong Option";
+        break;
+}
+system("cls");
+    cout<<"Do you Want to use again 1.Yes 2. No    ";
+cin>>j;
+}}
+else
+{cout<<"\t\t\t\a    Incorrect Password\n  ";
+     system("pause");
+     exit(0);
+}
+system("cls");
+cout<<"Thanks For Using";
+getch();
+}
